@@ -10,6 +10,16 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+def plot_convergence(delta_list, env_name, gamma):
+    x = range(len(delta_list))
+    plt.plot(x, delta_list)
+    plt.title('Delta by Iteration')
+    plt.xlabel('Iteration')
+    plt.ylabel('Delta')
+    plt.savefig('images/%s_convergence_%s.png' % (env_name, str(gamma)))
+    plt.clf()
+
+
 def argmax(env, V, pi, action, s, gamma):
     e = np.zeros(env.action_space.n)
     for a in range(env.action_space.n):  # iterate for every action possible
@@ -69,14 +79,16 @@ def bellman_optimality_update(env, V, s, gamma):  # update the stae_value V[s] b
     return V[s]
 
 
-def value_iteration(env, gamma, theta):
+def value_iteration(env, gamma, theta, env_name):
     V = np.zeros(env.observation_space.n)  # initialize v(0) to arbitory value, my case "zeros"
+    delta_list = []
     while True:
         delta = 0
         for s in range(env.observation_space.n):  # iterate for all states
             v = V[s]
             bellman_optimality_update(env, V, s, gamma)  # update state_value with bellman_optimality_update
             delta = max(delta, abs(v - V[s]))  # assign the change in value per iteration to delta
+            delta_list.append(delta) # tracks the deltas each iteration so we can plot convergence
         if delta < theta:
             break  # if change gets to negligible
             # --> converged to optimal value
@@ -84,6 +96,9 @@ def value_iteration(env, gamma, theta):
     action = np.zeros((env.observation_space.n))
     for s in range(env.observation_space.n):
         pi = argmax(env, V, pi, action, s, gamma)  # extract optimal policy using action value
+
+    # plot convergence
+    plot_convergence(delta_list, env_name, gamma)
 
     return V, pi, action  # optimal value funtion, optimal policy
 
@@ -134,4 +149,5 @@ def marked_policy(P, env, env_name, gamma):
                      cbar=False)
     # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
     plt.savefig('images/%s_movesmade_%s.png' % (env_name, str(gamma)))
+    plt.clf()
 

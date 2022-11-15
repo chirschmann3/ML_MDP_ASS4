@@ -29,7 +29,7 @@ def tg(gamma_list, env_name, iteration_type):
         print('gamma = %s' % str(gamma))
         if iteration_type == 'value_iteration':
             start = time.time()
-            V, pi, action = VI.value_iteration(env, gamma, theta)
+            V, pi, action = VI.value_iteration(env, gamma, theta, env_name)
             print('Time to converge: ' + str((time.time() - start)))
 
             a = np.reshape(action, (env.nrow, env.ncol))

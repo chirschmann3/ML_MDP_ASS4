@@ -3,7 +3,7 @@ Main place to gather and learn from the all knowledgable Bill Nye.
 I.e. run all experiments here....
 """
 
-from learners import VI
+from learners import VI, PI
 import gymnasium as gym
 import hiive.mdptoolbox.example
 import numpy as np
@@ -58,8 +58,19 @@ def run_value_iteration(gamma_list, theta, env_name, *args):
             results = VI.tree_VI(T, R, gamma_list, theta, s)
             # print('Results by Gamma:')
             # print(results[['gamma', 'time', 'iterations', 'reward', 'error', 'max V', 'mean V']])
-            print('Policy Highest Gamma')
-            print(results['policy'].iloc[-1])
+            # print('Policy Highest Gamma')
+            # print(results['policy'].iloc[-1])
+
+
+def run_policy_iteration(gamma_list, env_name, error_gamma2plot, *args):
+    if env_name == 'Forest':
+        for s in args[0]:
+            T, R = hiive.mdptoolbox.example.forest(S=s)
+            results = PI.tree_PI(T, R, gamma_list, error_gamma2plot, s)
+            # print('Results by Gamma:')
+            # print(results[['gamma', 'time', 'iterations', 'reward', 'error', 'max V', 'mean V']])
+            # print('Policy Highest Gamma')
+            # print(results['policy'].iloc[-1])
 
 
 if __name__=='__main__':
@@ -72,10 +83,13 @@ if __name__=='__main__':
     print('\nRunning Frozen Lake Value Iteration\n')
     # run_value_iteration(gamma_list, theta, env_name)
 
-    # run forest value iteration
+    # run forest experiments
     env_name = 'Forest'
-    print('\nRunning Forest Value Iteration\n')
     gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
     theta = 1e-12
     state_sizes = [3, 5, 10, 50, 100, 500]
-    run_value_iteration(gamma_list, theta, env_name, state_sizes)
+    print('\nRunning Forest Value Iteration\n')
+    # run_value_iteration(gamma_list, theta, env_name, state_sizes)
+    print('\nRunning Forest Policy Iteration\n')
+    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
+    run_policy_iteration(gamma_list, env_name, 0.8, state_sizes)

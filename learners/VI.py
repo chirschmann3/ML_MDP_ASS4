@@ -20,7 +20,7 @@ def plot_convergence(delta_list, env_name, gamma):
     plt.title('Delta by Iteration')
     plt.xlabel('Iteration')
     plt.ylabel('Delta')
-    plt.savefig('images/%s_convergence_%s.png' % (env_name, str(gamma)))
+    plt.savefig('images/VI/%s_convergence_%s.png' % (env_name, str(gamma)))
     plt.clf()
 
 
@@ -113,14 +113,14 @@ def plot_value(V, env_name, gamma):
     plt.title('Value Over States')
     plt.xlabel('State')
     plt.ylabel('Value')
-    plt.savefig('images/%s_values_%s.png' % (env_name, str(gamma)))
+    plt.savefig('images/VI/%s_values_%s.png' % (env_name, str(gamma)))
     plt.clf()
 
 
 def plot_policy(pi, env_name, gamma):
     sns.set()
     ax = sns.heatmap(pi.transpose(), yticklabels=['Left', 'Down', 'Up', 'Right'])
-    plt.savefig('images/%s_policy_%s.png' % (env_name, str(gamma)))
+    plt.savefig('images/VI/%s_policy_%s.png' % (env_name, str(gamma)))
     plt.clf()
 
 
@@ -152,12 +152,13 @@ def marked_policy(P, env, env_name, gamma):
                      fmt='',
                      cbar=False)
     # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
-    plt.savefig('images/%s_movesmade_%s.png' % (env_name, str(gamma)))
+    plt.savefig('images/VI/%s_movesmade_%s.png' % (env_name, str(gamma)))
     plt.clf()
 
 
 def tree_VI(t, r, gamma_list, theta, size):
     max_iterations = 100000
+    # to store results of each iteration
     results = pd.DataFrame(columns=['gamma', 'time', 'iterations', 'reward', 'error', 'max V', 'mean V', 'policy'])
 
     for gamma in gamma_list:
@@ -174,7 +175,7 @@ def tree_VI(t, r, gamma_list, theta, size):
     plt.legend()
     plt.xlabel('Gamma')
     plt.ylabel('Value')
-    plt.savefig('images/tree_valuegamma_' + str(size))
+    plt.savefig('images/VI/tree_valuegamma_' + str(size))
     plt.clf()
 
     # plot convergence of last iteration
@@ -183,7 +184,7 @@ def tree_VI(t, r, gamma_list, theta, size):
     plt.title('Error by Iteration')
     plt.xlabel('Iteration')
     plt.ylabel('Error')
-    plt.savefig('images/tree_convergence_' + str(size))
+    plt.savefig('images/VI/tree_convergence_' + str(size))
     plt.clf()
 
     # plot policy at 0.9 gamma
@@ -217,7 +218,7 @@ def tree_VI(t, r, gamma_list, theta, size):
                                horizontalalignment='center', size=10, verticalalignment='center', color='w')
     plt.title('Forest Clearing Policy')
     plt.axis('off')
-    plt.savefig('images/tree_policy_' + str(size))
+    plt.savefig('images/VI/tree_policy_' + str(size))
     plt.clf()
 
 

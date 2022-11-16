@@ -5,6 +5,9 @@ https://towardsdatascience.com/value-iteration-to-solve-openai-gyms-frozenlake-6
 """
 
 import gymnasium as gym
+import hiive.mdptoolbox as mdptoolbox
+import pandas as pd
+from hiive.mdptoolbox.mdp import ValueIteration
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -150,4 +153,39 @@ def marked_policy(P, env, env_name, gamma):
     # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
     plt.savefig('images/%s_movesmade_%s.png' % (env_name, str(gamma)))
     plt.clf()
+
+
+def tree_VI(t, r, gamma_list, theta, size):
+    max_iterations = 100000
+    results = pd.DataFrame(columns=['gamma', 'time', 'iterations', 'reward', 'error', 'max V', 'mean V', 'policy'])
+
+    for gamma in gamma_list:
+        test = ValueIteration(t, r, gamma=gamma, epsilon=theta, max_iter=max_iterations)
+        runs = test.run()
+        results_list = [gamma, runs[-1]['Time'], runs[-1]['Iteration'], runs[-1]['Reward'],
+                        runs[-1]['Error'], runs[-1]['Max V'], runs[-1]['Mean V'], test.policy]
+        results.loc[len(results.index)] = results_list
+
+    # plot gamma vs Max and Mean V
+    plt.plot(results['gamma'], results['max V'], label='Max V')
+    plt.plot(results['gamma'], results['mean V'], label='Mean V')
+    plt.title('Gamma vs Value')
+    plt.legend()
+    plt.xlabel('Gamma')
+    plt.ylabel('Value')
+    plt.savefig('images/tree_valuegamma_' + str(size))
+    plt.clf()
+
+    # plot convergence of last iteration
+    error = [runs[i]['Error'] for i in range(len(runs))]
+    plt.plot(range(len(error)), error)
+    plt.title('Error by Iteration')
+    plt.xlabel('Iteration')
+    plt.ylabel('Error')
+    plt.savefig('images/tree_convergence_' + str(size))
+    plt.clf()
+
+    return results
+
+
 

@@ -75,7 +75,7 @@ if __name__=='__main__':
     # run forest value iteration
     env_name = 'Forest'
     print('\nRunning Forest Value Iteration\n')
-    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 0.999, 1.0]
+    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
     theta = 1e-12
     state_sizes = [3, 5, 10, 50, 100, 500]
     run_value_iteration(gamma_list, theta, env_name, state_sizes)

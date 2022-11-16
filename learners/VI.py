@@ -11,6 +11,7 @@ from hiive.mdptoolbox.mdp import ValueIteration
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math
 
 
 def plot_convergence(delta_list, env_name, gamma):
@@ -184,6 +185,41 @@ def tree_VI(t, r, gamma_list, theta, size):
     plt.ylabel('Error')
     plt.savefig('images/tree_convergence_' + str(size))
     plt.clf()
+
+    # plot policy at 0.9 gamma
+    sq_color = {0: 'k', 1: 'r'}
+    sq_label = {0: 'Wt', 1: 'Ct'}
+    policy = results[results['gamma'] == 0.9]['policy'].iloc[0]
+    if len(policy) > 5:
+        square_len = size // 5
+        square_width = 5
+        policy = np.array(list(policy)).reshape(square_width, square_len)
+    else:
+        square_len = 1
+        square_width = len(policy)
+        policy = np.array(policy)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, xlim=(-.01, square_width+0.01), ylim=(-.01, square_len+0.01))
+    for i in range(square_width):
+        for j in range(square_len):
+            y = square_len - j - 1
+            x = i
+            pt = plt.Rectangle([x, y], 1, 1, edgecolor='k', linewidth=1)
+            if square_len > 1:
+                pt.set_facecolor(sq_color[policy[i, j]])
+                ax.add_patch(pt)
+                text = ax.text(x + 0.5, y + 0.5, sq_label[policy[i, j]],
+                               horizontalalignment='center', size=10, verticalalignment='center', color='w')
+            else:
+                pt.set_facecolor(sq_color[policy[i]])
+                ax.add_patch(pt)
+                text = ax.text(x+0.5, y+0.5, sq_label[policy[i]],
+                               horizontalalignment='center', size=10, verticalalignment='center', color='w')
+    plt.title('Forest Clearing Policy')
+    plt.axis('off')
+    plt.savefig('images/tree_policy_' + str(size))
+    plt.clf()
+
 
     return results
 

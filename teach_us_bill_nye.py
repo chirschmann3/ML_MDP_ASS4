@@ -65,17 +65,17 @@ def run_value_iteration(gamma_list, theta, env_name, *args):
 if __name__=='__main__':
     np.random.seed(9)
 
-    # set gammas and epsilon for all experiments
-    gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
-    theta = 1e-12
-
     # run frozen lake value iteration
     env_name = 'FrozenLake8x8-v1'
+    gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
+    theta = 1e-12
     print('\nRunning Frozen Lake Value Iteration\n')
-    run_value_iteration(gamma_list, theta, env_name)
+    # run_value_iteration(gamma_list, theta, env_name)
 
     # run forest value iteration
     env_name = 'Forest'
     print('\nRunning Forest Value Iteration\n')
+    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 0.999, 1.0]
+    theta = 1e-12
     state_sizes = [3, 5, 10, 50, 100, 500]
     run_value_iteration(gamma_list, theta, env_name, state_sizes)

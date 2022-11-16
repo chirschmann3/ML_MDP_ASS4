@@ -65,6 +65,7 @@ def run_value_iteration(gamma_list, theta, env_name, *args):
 if __name__=='__main__':
     np.random.seed(9)
 
+    # set gammas and epsilon for all experiments
     gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
     theta = 1e-12
 

@@ -87,8 +87,8 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
             print()
             #
             # VI.plot_value(V, env_name, gamma)
-            # VI.plot_policy(pi, env_name, gamma)
-            # VI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
+            PI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
+            # TODO make convergence plot
 
 
 if __name__=='__main__':

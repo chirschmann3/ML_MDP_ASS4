@@ -145,3 +145,45 @@ def policy_iteration(env, gamma=1.0, eps=1e-12):
             break
         policy = new_policy
     return policy
+
+
+def plot_value(V, env_name, gamma):
+    x = range(V.shape[0])
+    plt.bar(x, V)
+    plt.title('Value Over States')
+    plt.xlabel('State')
+    plt.ylabel('Value')
+    plt.savefig('images/PI/%s_values_%s.png' % (env_name, str(gamma)))
+    plt.clf()
+
+
+def marked_policy(P, env, env_name, gamma):
+    # https://towardsdatascience.com/this-is-how-reinforcement-learning-works-5080b3a335d6
+    # function for displaying a heatmap
+    nb_states = env.observation_space.n
+    actions = P
+    state_labels = np.where(actions == 0, '<',
+                            np.where(actions == 1, 'v',
+                                     np.where(actions == 2, '>',
+                                              np.where(actions == 3, '^', 0)
+                                              )
+                                     )
+                            )
+    desc = env.unwrapped.desc.ravel().astype(str)
+    color_values = np.where(desc == 'S', 0,
+                      np.where(desc == 'F', 1,
+                               np.where(desc == 'H', 2,
+                                        np.where(desc == 'G', 3, desc))))
+    colors = np.where(desc == 'S', 'y',
+                      np.where(desc == 'F', 'b',
+                               np.where(desc == 'H', 'r',
+                                        np.where(desc == 'G', 'g', desc))))
+    ax = sns.heatmap(color_values.astype(int).reshape(int(np.sqrt(nb_states)), int(np.sqrt(nb_states))),
+                     linewidth=0.5,
+                     annot=state_labels.reshape(int(np.sqrt(nb_states)), int(np.sqrt(nb_states))),
+                     cmap=list(colors),
+                     fmt='',
+                     cbar=False)
+    # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
+    plt.savefig('images/PI/%s_movesmade_%s.png' % (env_name, str(gamma)))
+    plt.clf()

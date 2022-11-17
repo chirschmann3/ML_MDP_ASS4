@@ -72,3 +72,76 @@ def tree_PI(t, r, gamma_list, error_gamma2plot, size):
     plt.axis('off')
     plt.savefig('images/PI/tree_policy_' + str(size))
     plt.clf()
+
+
+# below from
+# https://medium.com/@m.alzantot/deep-reinforcement-learning-demysitifed-episode-2-policy-iteration-value-iteration-and-q-978f9e89ddaa
+def run_episode(env, policy, gamma=1.0, render=False):
+    """ Runs an episode and return the total reward """
+    max_attempts = 10000
+    obs = env.reset()[0]
+    total_reward = 0
+    step_idx = 0
+    reached_end = False
+    while True and max_attempts > 0:
+        if render:
+            env.render()
+        obs, reward, done, _, _ = env.step(int(policy[obs]))
+        total_reward += (gamma ** step_idx * reward)
+        step_idx += 1
+        max_attempts -= 1
+        if done:
+            reached_end = True
+            break
+    return total_reward, reached_end
+
+
+def evaluate_policy(env, policy, gamma=1.0, n=100):
+    outcome = [run_episode(env, policy, gamma, False) for _ in range(n)]
+    count_success = sum(bool(x) for _, x in outcome)
+    rewards = [x for x, _ in outcome]
+    max_r = max(rewards)
+    mean_r = np.mean(rewards)
+    return count_success, max_r, mean_r
+
+
+def extract_policy(env, v, gamma=1.0):
+    """ Extract the policy given a value-function """
+    policy = np.zeros(env.observation_space.n)
+    for s in range(env.observation_space.n):
+        q_sa = np.zeros(env.action_space.n)
+        for a in range(env.action_space.n):
+            q_sa[a] = sum([p * (r + gamma * v[s_]) for p, s_, r, _ in env.P[s][a]])
+        policy[s] = np.argmax(q_sa)
+    return policy
+
+
+def compute_policy_v(env, policy, eps=1e-12, gamma=1.0):
+    """ Iteratively evaluate the value-function under policy.
+    Alternatively, we could formulate a set of linear equations in iterms of v[s]
+    and solve them to find the value function.
+    """
+    v = np.zeros(env.observation_space.n)
+    while True:
+        prev_v = np.copy(v)
+        for s in range(env.observation_space.n):
+            policy_a = policy[s]
+            v[s] = sum([p * (r + gamma * prev_v[s_]) for p, s_, r, _ in env.P[s][policy_a]])
+        if (np.sum((np.fabs(prev_v - v))) <= eps):
+            # value converged
+            break
+    return v
+
+
+def policy_iteration(env, gamma=1.0, eps=1e-12):
+    """ Policy-Iteration algorithm """
+    policy = np.random.choice(env.action_space.n, size=(env.observation_space.n))  # initialize a random policy
+    max_iterations = 200000
+    for i in range(max_iterations):
+        old_policy_v = compute_policy_v(env, policy, eps, gamma)
+        new_policy = extract_policy(env, old_policy_v, gamma)
+        if (np.all(policy == new_policy)):
+            print('Policy-Iteration converged at step %d.' % (i+1))
+            break
+        policy = new_policy
+    return policy

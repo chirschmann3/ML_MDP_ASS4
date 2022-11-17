@@ -62,7 +62,7 @@ def run_value_iteration(gamma_list, theta, env_name, *args):
             # print(results['policy'].iloc[-1])
 
 
-def run_policy_iteration(gamma_list, env_name, error_gamma2plot, *args):
+def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
     if env_name == 'Forest':
         for s in args[0]:
             T, R = hiive.mdptoolbox.example.forest(S=s)
@@ -71,6 +71,24 @@ def run_policy_iteration(gamma_list, env_name, error_gamma2plot, *args):
             # print(results[['gamma', 'time', 'iterations', 'reward', 'error', 'max V', 'mean V']])
             # print('Policy Highest Gamma')
             # print(results['policy'].iloc[-1])
+    else:
+        env = gym.make(env_name)
+        print(env.desc)
+        for gamma in gamma_list:
+            print('gamma = %s' % str(gamma))
+            start = time.time()
+            pi = PI.policy_iteration(env, gamma, eps)
+            print('Time to converge: ' + str((time.time() - start)))
+            num_success, max_r, mean_r = PI.evaluate_policy(env, pi, gamma)
+            print(" agent succeeded to reach goal {} out of 100 Episodes using this policy ".format(num_success))
+            a = np.reshape(pi, (env.nrow, env.ncol))
+            print('Policy Actions to Take')
+            print(a)  # discrete action to take in given state
+            print()
+            #
+            # VI.plot_value(V, env_name, gamma)
+            # VI.plot_policy(pi, env_name, gamma)
+            # VI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
 
 
 if __name__=='__main__':
@@ -79,17 +97,18 @@ if __name__=='__main__':
     # run frozen lake value iteration
     env_name = 'FrozenLake8x8-v1'
     gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
-    theta = 1e-12
+    eps = 1e-12
     print('\nRunning Frozen Lake Value Iteration\n')
-    # run_value_iteration(gamma_list, theta, env_name)
+    # run_value_iteration(gamma_list, eps, env_name)
+    print('\nRunning Frozen Lake Policy Iteration\n')
+    run_policy_iteration(gamma_list, eps, env_name, 0.8)
 
     # run forest experiments
     env_name = 'Forest'
     gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
-    theta = 1e-12
     state_sizes = [3, 5, 10, 50, 100, 500]
     print('\nRunning Forest Value Iteration\n')
-    # run_value_iteration(gamma_list, theta, env_name, state_sizes)
+    # run_value_iteration(gamma_list, eps, env_name, state_sizes)
     print('\nRunning Forest Policy Iteration\n')
     gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
-    run_policy_iteration(gamma_list, env_name, 0.8, state_sizes)
+    # run_policy_iteration(gamma_list, eps, env_name, 0.8, state_sizes)

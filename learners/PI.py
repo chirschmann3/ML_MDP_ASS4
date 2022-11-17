@@ -74,6 +74,16 @@ def tree_PI(t, r, gamma_list, error_gamma2plot, size):
     plt.clf()
 
 
+def plot_convergence(delta_list, env_name, gamma):
+    x = range(len(delta_list))
+    plt.plot(x, delta_list)
+    plt.title('Delta by Iteration')
+    plt.xlabel('Iteration')
+    plt.ylabel('Delta')
+    plt.savefig('images/PI/%s_convergence_%s.png' % (env_name, str(gamma)))
+    plt.clf()
+
+
 # below from
 # https://medium.com/@m.alzantot/deep-reinforcement-learning-demysitifed-episode-2-policy-iteration-value-iteration-and-q-978f9e89ddaa
 def run_episode(env, policy, gamma=1.0, render=False):
@@ -133,17 +143,20 @@ def compute_policy_v(env, policy, eps=1e-12, gamma=1.0):
     return v
 
 
-def policy_iteration(env, gamma=1.0, eps=1e-12):
+def policy_iteration(env, env_name, gamma=1.0, eps=1e-12):
     """ Policy-Iteration algorithm """
     policy = np.random.choice(env.action_space.n, size=(env.observation_space.n))  # initialize a random policy
     max_iterations = 200000
+    count_of_differences = []
     for i in range(max_iterations):
         old_policy_v = compute_policy_v(env, policy, eps, gamma)
         new_policy = extract_policy(env, old_policy_v, gamma)
+        count_of_differences.append(sum(i != j for i, j in zip(policy, new_policy)))
         if (np.all(policy == new_policy)):
             print('Policy-Iteration converged at step %d.' % (i+1))
             break
         policy = new_policy
+    plot_convergence(count_of_differences, env_name, gamma)
     return policy
 
 

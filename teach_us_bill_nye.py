@@ -7,6 +7,7 @@ from learners import VI, PI
 import gymnasium as gym
 import hiive.mdptoolbox.example
 import numpy as np
+import matplotlib.pyplot as plt
 import time
 
 
@@ -77,7 +78,7 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
         for gamma in gamma_list:
             print('gamma = %s' % str(gamma))
             start = time.time()
-            pi = PI.policy_iteration(env, gamma, eps)
+            pi = PI.policy_iteration(env, env_name, gamma, eps)
             print('Time to converge: ' + str((time.time() - start)))
             num_success, max_r, mean_r = PI.evaluate_policy(env, pi, gamma)
             print(" agent succeeded to reach goal {} out of 100 Episodes using this policy ".format(num_success))
@@ -85,10 +86,8 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
             print('Policy Actions to Take')
             print(a)  # discrete action to take in given state
             print()
-            #
-            # VI.plot_value(V, env_name, gamma)
+
             PI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
-            # TODO make convergence plot
 
 
 if __name__=='__main__':

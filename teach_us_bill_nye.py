@@ -3,11 +3,10 @@ Main place to gather and learn from the all knowledgable Bill Nye.
 I.e. run all experiments here....
 """
 
-from learners import VI, PI
+from learners import VI, PI, qlearner
 import gymnasium as gym
 import hiive.mdptoolbox.example
 import numpy as np
-import matplotlib.pyplot as plt
 import time
 
 
@@ -51,7 +50,7 @@ def run_value_iteration(gamma_list, theta, env_name, *args):
                         if reward == 1:
                             e += 1
                         break
-            print(" agent succeeded to reach goal {} out of 100 Episodes using this policy ".format(e + 1))
+            print(" agent succeeded to reach goal {} out of 100 Episodes using this policy ".format(e))
             print()
     elif env_name == 'Forest':
         for s in args[0]:
@@ -90,24 +89,39 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
             PI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
 
 
+def run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay_list, *args):
+    if env_name == 'Forest':
+        for s in args[0]:
+            print('Checking state size: ' + str(s))
+            T, R = hiive.mdptoolbox.example.forest(S=s)
+            results = qlearner.tree_QL(T, R, gamma_list, epsilon_list, alpha_list, alpha_decay_list)
+
+
 if __name__=='__main__':
     np.random.seed(9)
 
     # run frozen lake value iteration
-    env_name = 'FrozenLake8x8-v1'
-    gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
-    eps = 1e-12
-    print('\nRunning Frozen Lake Value Iteration\n')
+    # env_name = 'FrozenLake8x8-v1'
+    # gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
+    # eps = 1e-12
+    # print('\nRunning Frozen Lake Value Iteration\n')
     # run_value_iteration(gamma_list, eps, env_name)
-    print('\nRunning Frozen Lake Policy Iteration\n')
-    run_policy_iteration(gamma_list, eps, env_name, 0.8)
+    # print('\nRunning Frozen Lake Policy Iteration\n')
+    # run_policy_iteration(gamma_list, eps, env_name, 0.8)
 
     # run forest experiments
     env_name = 'Forest'
-    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
-    state_sizes = [3, 5, 10, 50, 100, 500]
-    print('\nRunning Forest Value Iteration\n')
+    # gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
+    # state_sizes = [3, 5, 10, 50, 100, 500]
+    # print('\nRunning Forest Value Iteration\n')
     # run_value_iteration(gamma_list, eps, env_name, state_sizes)
-    print('\nRunning Forest Policy Iteration\n')
-    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
+    # print('\nRunning Forest Policy Iteration\n')
+    # gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
     # run_policy_iteration(gamma_list, eps, env_name, 0.8, state_sizes)
+    print('\nRunning Forest QLearning\n')
+    gamma_list = [0.1, 0.9]
+    epsilon_list = [0.9]
+    alpha_list = [0.1]
+    alpha_decay = [0.9]
+    state_size = [3, 100]
+    run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay, state_size)

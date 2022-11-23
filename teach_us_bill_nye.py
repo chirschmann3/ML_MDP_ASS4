@@ -2,12 +2,14 @@
 Main place to gather and learn from the all knowledgable Bill Nye.
 I.e. run all experiments here....
 """
+import random
 
 from learners import VI, PI, qlearner
 import gymnasium as gym
 import hiive.mdptoolbox.example
 import numpy as np
 import time
+import random
 
 
 # def test_gamma(gamma_list, env_name, iteration_type):
@@ -89,16 +91,21 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
             PI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
 
 
-def run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay_list, *args):
+def run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay_list, error_gamma2plot, *args):
     if env_name == 'Forest':
         for s in args[0]:
             print('Checking state size: ' + str(s))
             T, R = hiive.mdptoolbox.example.forest(S=s)
-            results = qlearner.tree_QL(T, R, gamma_list, epsilon_list, alpha_list, alpha_decay_list)
+            results = qlearner.tree_QL(T, R, gamma_list, epsilon_list,
+                                       alpha_list, alpha_decay_list, error_gamma2plot, s)
+    else:
+        env = gym.make(env_name)
+
 
 
 if __name__=='__main__':
     np.random.seed(9)
+    random.seed(9)
 
     # run frozen lake value iteration
     # env_name = 'FrozenLake8x8-v1'
@@ -119,9 +126,9 @@ if __name__=='__main__':
     # gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
     # run_policy_iteration(gamma_list, eps, env_name, 0.8, state_sizes)
     print('\nRunning Forest QLearning\n')
-    gamma_list = [0.1, 0.9]
-    epsilon_list = [0.9]
-    alpha_list = [0.1]
-    alpha_decay = [0.9]
-    state_size = [3, 100]
-    run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay, state_size)
+    gamma_list = [0.1, 0.5, 0.8, 0.9, 0.99]
+    epsilon_decay_list = [0.1, 0.5, 0.9, 0.99]
+    alpha_list = [0.1, 0.5, 0.9, 0.99]
+    alpha_decay = [0.1, 0.5, 0.9, 0.99]
+    state_size = [100]
+    run_qlearning(env_name, gamma_list, epsilon_decay_list, alpha_list, alpha_decay, 0.8, state_size)

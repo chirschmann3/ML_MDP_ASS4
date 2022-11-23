@@ -208,3 +208,79 @@ def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_l
     # write all results to CSV
     csvFile = 'images/QLearn/QL_results_lake.csv'
     results.to_csv(csvFile)
+
+    # read from CSV
+    # comment out if rerunning above
+    results = pd.read_csv('images/QLearn/QL_results_lake.csv', index_col=0)
+
+    # get optimal run
+    best_combo_loc = results['reward'].idxmax()
+    best_combo = results.iloc[best_combo_loc, :4]
+    best_combo = list(zip(best_combo.index, best_combo))
+    print('Highest Value Combination: ' + str(best_combo))
+
+    # plot policy from optimal run
+    best_policy = results['policy'].iloc(best_combo_loc)
+    marked_policy(best_policy, env)
+
+    # plot combos of other parameters for each optimal value
+    print('Plotting things')
+    params = ['gamma', 'epsilon', 'alpha', 'alpha decay']
+    for param in params:
+        steady_vals = [x for x in best_combo if x[0] != param]
+        df = results[(results[steady_vals[0][0]] == steady_vals[0][1]) &
+                     (results[steady_vals[1][0]] == steady_vals[1][1]) &
+                     (results[steady_vals[2][0]] == steady_vals[2][1])]
+        plot_value_lake(param, df)
+
+    # plot convergence of best combo
+    error = results['error'].iloc(best_combo_loc)
+    plt.plot(range(len(error)), error)
+    plt.title('Avg QTable Update by Episode')
+    plt.xlabel('Episode')
+    # plt.ylim((0, 0.1))
+    plt.ylabel('Avg Change')
+    plt.savefig('images/QLearn/FrozenLake_convergence.png')
+    plt.clf()
+
+
+def marked_policy(P, env):
+    # https://towardsdatascience.com/this-is-how-reinforcement-learning-works-5080b3a335d6
+    # function for displaying a heatmap
+    nb_states = env.observation_space.n
+    actions = P
+    state_labels = np.where(actions == 0, '<',
+                            np.where(actions == 1, 'v',
+                                     np.where(actions == 2, '>',
+                                              np.where(actions == 3, '^', 0)
+                                              )
+                                     )
+                            )
+    desc = env.unwrapped.desc.ravel().astype(str)
+    color_values = np.where(desc == 'S', 0,
+                      np.where(desc == 'F', 1,
+                               np.where(desc == 'H', 2,
+                                        np.where(desc == 'G', 3, desc))))
+    colors = np.where(desc == 'S', 'y',
+                      np.where(desc == 'F', 'b',
+                               np.where(desc == 'H', 'r',
+                                        np.where(desc == 'G', 'g', desc))))
+    ax = sns.heatmap(color_values.astype(int).reshape(int(np.sqrt(nb_states)), int(np.sqrt(nb_states))),
+                     linewidth=0.5,
+                     annot=state_labels.reshape(int(np.sqrt(nb_states)), int(np.sqrt(nb_states))),
+                     cmap=list(colors),
+                     fmt='',
+                     cbar=False)
+    # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
+    plt.savefig('images/QLearn/FrozenLake_policy.png')
+    plt.clf()
+
+
+def plot_value_lake(hyperparam, df):
+    plt.plot(df[hyperparam], df['reward'], label='Avg Episode Reward')
+    plt.title('%s vs Value' + hyperparam)
+    plt.legend()
+    plt.xlabel(hyperparam)
+    plt.ylabel('Value')
+    plt.savefig('images/QLearn/FrozenLake_valueby_%s.png' % hyperparam)
+    plt.clf()

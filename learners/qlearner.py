@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import time
+import random
 
 from hiive.mdptoolbox.mdp import QLearning
 
@@ -18,7 +19,7 @@ def plot_value(hyperparam, df, size):
     plt.clf()
 
 
-def tree_QL(t, r, gamma_list, epsilon_list, alpha_list, alpha_decay_list, error_gamma2plot, size):
+def tree_QL(t, r, gamma_list, epsilon_list, alpha_list, alpha_decay_list, size):
     max_iterations = 1e6
     # to store results of each iteration
     results = pd.DataFrame(columns=['gamma', 'epsilon', 'alpha', 'alpha decay',
@@ -41,9 +42,6 @@ def tree_QL(t, r, gamma_list, epsilon_list, alpha_list, alpha_decay_list, error_
     #                                 runs[-1]['Time'], runs[-1]['Iteration'], runs[-1]['Reward'],
     #                                 runs[-1]['Error'], runs[-1]['Max V'], runs[-1]['Mean V'], test.policy]
     #                 results.loc[len(results.index)] = results_list
-    #                 if gamma == error_gamma2plot:
-    #                     error2plot = [runs[i]['Error'] for i in range(len(runs))]
-    #                     values_list = [size, gamma, eps, alpha, alpha_decay]
     #
     # # write all results to CSV
     # csvFile = 'images/QLearn/QL_results_%s.csv' % size
@@ -125,39 +123,88 @@ def tree_QL(t, r, gamma_list, epsilon_list, alpha_list, alpha_decay_list, error_
     return results
 
 
-def lake_QL(env, gamma_list, epsilon_list, alpha_list, alpha_decay_list, error_gamma2plot, size):
+def lake_QL(env, gamma, eps_decay, alpha, alpha_decay):
     # code adapted from https://towardsdatascience.com/reinforcement-learning-with-openai-d445c2c687d2
+    eps = 1.0
     eps_min = 0.1
-    max_iterations = 1e6
+    alpha_min = 0.001
+    theta = 1e-15 # value to break if Q isn't changing
+    max_episodes = 1e5
+    rev_list = []
+    error_list = []
     Q = np.zeros([env.observation_space.n, env.action_space.n])
 
-    for i in range(max_iterations):
-        s = env.reset()
+    start = time.time()
+    for i in range(int(max_episodes)):
+        s = env.reset()[0]
         rALL = 0
         d = False
         j = 0
-        while j < 99:
-            env.render()
+        error = []
+        # former_q = Q
+        # run episode up to 5000 steps
+        while j < 500:
+            # env.render()
             j+=1
             # action choice: greedy with increasing probability
             # random action for epsilon and greedy with 1-eps
             pn = np.random.random()
-            if pn < epsilon:
+            if pn < eps:
                 a = np.random.randint(0, env.action_space.n)
             else:
                 # optimal action
                 a = Q[s, :].argmax()
             # get new state and reward
-            s1, r, d, _ = env.step(a)
+            s1, r, d, _, _ = env.step(a)
             # update Q-Table
-            Q[s,a] = Q[s,a] + alpha * (r + gamma * np.max(Q[s1,:]) - Q[s,a])
+            dQ = alpha * (r + gamma * np.max(Q[s1,:]) - Q[s,a])
+            Q[s,a] = Q[s,a] + dQ
+            error.append(np.absolute(dQ))
+            # decay alpha and epsilon
+            alpha *= alpha_decay
+            if alpha < alpha_min: alpha = alpha_min
+            eps *= eps_decay
+            if eps < eps_min: eps = eps_min
             rALL += r
             s = s1
-            if d == True:
+            if d:
                 break
 
         rev_list.append(rALL)
-        env.render()
+        # error is looked at as the mean update to the Q table at each move in the episode
+        error_list.append(np.mean(error))
+        # env.render()
+
+        # break if all differences are smaller than theta
+        # if Q.sum() > 0 & np.all((former_q - Q) < theta):
+        #     break
+
+    total_time = time.time() - start
+    avg_reward = sum(rev_list)/max_episodes
+    policy = np.argmax(Q, axis=1)
+    return [total_time, avg_reward, error_list, policy]
 
 
-            # decay alpha and gamma
+def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_list):
+    # to store results of each iteration
+    results = pd.DataFrame(columns=['gamma', 'epsilon', 'alpha', 'alpha decay',
+                                    'time', 'reward', 'error', 'policy'])
+
+    # uncomment below to regather values but will take HOURS
+    # instead use the CSV the results were written to
+    for gamma in gamma_list:
+        for eps_decay in epsilon_list:
+            for alpha in alpha_list:
+                for alpha_decay in alpha_decay_list:
+                    print('Gamma: %s, Alpha: %s, Alpha Decay: %s, Epsilon Decay: %s'
+                          % (str(gamma), str(alpha), str(alpha_decay), str(eps_decay)))
+
+                    run = lake_QL(env, gamma, eps_decay, alpha, alpha_decay)
+
+                    results_list = [gamma, eps_decay, alpha, alpha_decay,
+                                    run[0], run[1], run[2], run[3]]
+                    results.loc[len(results.index)] = results_list
+
+    # write all results to CSV
+    csvFile = 'images/QLearn/QL_results_lake.csv'
+    results.to_csv(csvFile)

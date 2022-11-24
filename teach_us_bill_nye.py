@@ -8,6 +8,7 @@ from learners import VI, PI, qlearner
 import gymnasium as gym
 import hiive.mdptoolbox.example
 import numpy as np
+import pandas as pd
 import time
 import random
 
@@ -110,34 +111,33 @@ if __name__=='__main__':
 
     # run frozen lake experiments
     env_name = 'FrozenLake8x8-v1'
-    # gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
-    # eps = 1e-12
-    # print('\nRunning Frozen Lake Value Iteration\n')
-    # run_value_iteration(gamma_list, eps, env_name)
-    # print('\nRunning Frozen Lake Policy Iteration\n')
-    # run_policy_iteration(gamma_list, eps, env_name, 0.8)
+    # env_name = 'FrozenLake-v1'
+    gamma_list = [0.0001, 0.001, 0.1, 0.25, 0.5, 0.75, 1.0]
+    eps = 1e-12
+    print('\nRunning Frozen Lake Value Iteration\n')
+    run_value_iteration(gamma_list, eps, env_name)
+    print('\nRunning Frozen Lake Policy Iteration\n')
+    run_policy_iteration(gamma_list, eps, env_name, 0.8)
     print('\nRunning Frozen Lake QLearner\n')
     gamma_list = [0.5, 0.8, 1.0]
     epsilon_decay_list = [0.1, 0.9, 0.99]
     alpha_list = [0.1, 0.9, 0.99]
     alpha_decay = [0.1, 0.9, 0.99]
-    # env_name = 'FrozenLake-v1'
     run_qlearning(env_name, gamma_list, epsilon_decay_list, alpha_list, alpha_decay)
 
     # run forest experiments
     env_name = 'Forest'
-    # gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
-    # state_sizes = [3, 5, 10, 50, 100, 500]
-    # print('\nRunning Forest Value Iteration\n')
-    # run_value_iteration(gamma_list, eps, env_name, state_sizes)
-    # print('\nRunning Forest Policy Iteration\n')
-    # gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
-    # run_policy_iteration(gamma_list, eps, env_name, 0.8, state_sizes)
-    # print('\nRunning Forest QLearning\n')
-    # gamma_list = [0.1, 0.5, 0.8, 0.9, 0.99]
-    # epsilon_decay_list = [0.1, 0.5, 0.9, 0.99]
-    # alpha_list = [0.1, 0.5, 0.9, 0.99]
-    # alpha_decay = [0.1, 0.5, 0.9, 0.99]
-    # # TODO re-add size 3 below
-    # state_size = [3, 100]
-    # run_qlearning(env_name, gamma_list, epsilon_decay_list, alpha_list, alpha_decay, state_size)
+    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1.0]
+    state_sizes = [3, 5, 10, 50, 100, 500]
+    print('\nRunning Forest Value Iteration\n')
+    run_value_iteration(gamma_list, eps, env_name, state_sizes)
+    print('\nRunning Forest Policy Iteration\n')
+    gamma_list = [0.0001, 0.001, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99]
+    run_policy_iteration(gamma_list, eps, env_name, 0.8, state_sizes)
+    print('\nRunning Forest QLearning\n')
+    gamma_list = [0.1, 0.5, 0.8, 0.9, 0.99]
+    epsilon_decay_list = [0.1, 0.5, 0.9, 0.99]
+    alpha_list = [0.1, 0.5, 0.9, 0.99]
+    alpha_decay = [0.1, 0.5, 0.9, 0.99]
+    state_size = [3, 100]
+    run_qlearning(env_name, gamma_list, epsilon_decay_list, alpha_list, alpha_decay, state_size)

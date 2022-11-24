@@ -133,6 +133,8 @@ def lake_QL(env, gamma, eps_decay, alpha, alpha_decay):
     rev_list = []
     error_list = []
     Q = np.zeros([env.observation_space.n, env.action_space.n])
+    # initiate Q with slight preference for moving right to help it reach the goal
+    Q[:,2] = 0.000001
 
     start = time.time()
     for i in range(int(max_episodes)):
@@ -181,33 +183,34 @@ def lake_QL(env, gamma, eps_decay, alpha, alpha_decay):
 
     total_time = time.time() - start
     avg_reward = sum(rev_list)/max_episodes
+    print('Avg Reward: ' + str(avg_reward))
     policy = np.argmax(Q, axis=1)
-    return [total_time, avg_reward, error_list, policy]
+    return [total_time, avg_reward, error_list, policy, Q]
 
 
 def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_list):
     # to store results of each iteration
-    results = pd.DataFrame(columns=['gamma', 'epsilon', 'alpha', 'alpha decay',
-                                    'time', 'reward', 'error', 'policy'])
-
-    # uncomment below to regather values but will take HOURS
-    # instead use the CSV the results were written to
-    for gamma in gamma_list:
-        for eps_decay in epsilon_list:
-            for alpha in alpha_list:
-                for alpha_decay in alpha_decay_list:
-                    print('Gamma: %s, Alpha: %s, Alpha Decay: %s, Epsilon Decay: %s'
-                          % (str(gamma), str(alpha), str(alpha_decay), str(eps_decay)))
-
-                    run = lake_QL(env, gamma, eps_decay, alpha, alpha_decay)
-
-                    results_list = [gamma, eps_decay, alpha, alpha_decay,
-                                    run[0], run[1], run[2], run[3]]
-                    results.loc[len(results.index)] = results_list
-
-    # write all results to CSV
-    csvFile = 'images/QLearn/QL_results_lake.csv'
-    results.to_csv(csvFile)
+    # results = pd.DataFrame(columns=['gamma', 'epsilon', 'alpha', 'alpha decay',
+    #                                 'time', 'reward', 'error', 'policy', 'qtable'])
+    #
+    # # uncomment below to regather values but will take HOURS
+    # # instead use the CSV the results were written to
+    # for gamma in gamma_list:
+    #     for eps_decay in epsilon_list:
+    #         for alpha in alpha_list:
+    #             for alpha_decay in alpha_decay_list:
+    #                 print('Gamma: %s, Alpha: %s, Alpha Decay: %s, Epsilon Decay: %s'
+    #                       % (str(gamma), str(alpha), str(alpha_decay), str(eps_decay)))
+    #
+    #                 run = lake_QL(env, gamma, eps_decay, alpha, alpha_decay)
+    #
+    #                 results_list = [gamma, eps_decay, alpha, alpha_decay,
+    #                                 run[0], run[1], run[2], run[3], run[4]]
+    #                 results.loc[len(results.index)] = results_list
+    #
+    # # write all results to CSV
+    # csvFile = 'images/QLearn/QL_results_lake.csv'
+    # results.to_csv(csvFile)
 
     # read from CSV
     # comment out if rerunning above
@@ -220,7 +223,7 @@ def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_l
     print('Highest Value Combination: ' + str(best_combo))
 
     # plot policy from optimal run
-    best_policy = results['policy'].iloc(best_combo_loc)
+    best_policy = results['policy'].iloc[best_combo_loc]
     marked_policy(best_policy, env)
 
     # plot combos of other parameters for each optimal value
@@ -234,13 +237,14 @@ def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_l
         plot_value_lake(param, df)
 
     # plot convergence of best combo
-    error = results['error'].iloc(best_combo_loc)
+    error = results['error'][best_combo_loc]
+    error = [float(x) for x in np.array(error.strip('][').split(', '))]
     plt.plot(range(len(error)), error)
     plt.title('Avg QTable Update by Episode')
     plt.xlabel('Episode')
     # plt.ylim((0, 0.1))
     plt.ylabel('Avg Change')
-    plt.savefig('images/QLearn/FrozenLake_convergence.png')
+    plt.savefig('images/QLearn/FrozenLake8x8_convergence.png')
     plt.clf()
 
 
@@ -248,7 +252,7 @@ def marked_policy(P, env):
     # https://towardsdatascience.com/this-is-how-reinforcement-learning-works-5080b3a335d6
     # function for displaying a heatmap
     nb_states = env.observation_space.n
-    actions = P
+    actions = np.array(P.strip('][').split(' ')).astype(int)
     state_labels = np.where(actions == 0, '<',
                             np.where(actions == 1, 'v',
                                      np.where(actions == 2, '>',
@@ -258,9 +262,9 @@ def marked_policy(P, env):
                             )
     desc = env.unwrapped.desc.ravel().astype(str)
     color_values = np.where(desc == 'S', 0,
-                      np.where(desc == 'F', 1,
-                               np.where(desc == 'H', 2,
-                                        np.where(desc == 'G', 3, desc))))
+                            np.where(desc == 'F', 1,
+                                     np.where(desc == 'H', 2,
+                                              np.where(desc == 'G', 3, desc))))
     colors = np.where(desc == 'S', 'y',
                       np.where(desc == 'F', 'b',
                                np.where(desc == 'H', 'r',
@@ -272,7 +276,7 @@ def marked_policy(P, env):
                      fmt='',
                      cbar=False)
     # if want colors to correspond with moves, change color_values to np.argmax(P,axis=1).reshape...
-    plt.savefig('images/QLearn/FrozenLake_policy.png')
+    plt.savefig('images/QLearn/FrozenLake8x8_policy.png')
     plt.clf()
 
 
@@ -282,5 +286,5 @@ def plot_value_lake(hyperparam, df):
     plt.legend()
     plt.xlabel(hyperparam)
     plt.ylabel('Value')
-    plt.savefig('images/QLearn/FrozenLake_valueby_%s.png' % hyperparam)
+    plt.savefig('images/QLearn/FrozenLake8x8_valueby_%s.png' % hyperparam)
     plt.clf()

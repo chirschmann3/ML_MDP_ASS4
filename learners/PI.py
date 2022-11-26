@@ -1,11 +1,8 @@
-import gymnasium as gym
-import hiive.mdptoolbox as mdptoolbox
 import pandas as pd
 from hiive.mdptoolbox.mdp import PolicyIteration
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import math
 
 
 def tree_PI(t, r, gamma_list, error_gamma2plot, size):
@@ -21,6 +18,9 @@ def tree_PI(t, r, gamma_list, error_gamma2plot, size):
         results.loc[len(results.index)] = results_list
         if gamma == error_gamma2plot: error2plot = [runs[i]['Error'] for i in range(len(runs))]
 
+    # print time to run highest gamma
+    print('Time to converge at size %s with gamma=%s: %s' % (str(size), str(gamma), str(results['time'].iloc[-1])))
+
     # plot gamma vs Max and Mean V
     plt.plot(results['gamma'], results['max V'], label='Max Reward')
     plt.plot(results['gamma'], results['mean V'], label='Mean Reward')
@@ -28,10 +28,11 @@ def tree_PI(t, r, gamma_list, error_gamma2plot, size):
     plt.legend()
     plt.xlabel('Gamma')
     plt.ylabel('Value')
+    plt.ylim((0,400))
     plt.savefig('images/PI/tree_valuegamma_' + str(size))
     plt.clf()
 
-    # plot convergence of last iteration
+    # plot convergence of gamma given in error2plot
     plt.plot(range(len(error2plot)), error2plot)
     plt.title('Error by Iteration')
     plt.xlabel('Iteration')
@@ -79,8 +80,18 @@ def plot_convergence(delta_list, env_name, gamma):
     plt.plot(x, delta_list)
     plt.title('Delta by Iteration')
     plt.xlabel('Iteration')
+    plt.xlim((0, 12))
+    plt.ylim((0, 50))
     plt.ylabel('Delta')
     plt.savefig('images/PI/%s_convergence_%s.png' % (env_name, str(gamma)))
+    plt.clf()
+
+
+def plot_policy(pi, env_name, gamma):
+    sns.set()
+    ax = sns.heatmap(np.reshape(pi.transpose(), (pi.transpose().shape[0], 1)),
+                     yticklabels=['Left', 'Down', 'Up', 'Right'])
+    plt.savefig('images/PI/%s_policy_%s.png' % (env_name, str(gamma)))
     plt.clf()
 
 

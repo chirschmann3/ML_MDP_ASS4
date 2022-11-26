@@ -11,7 +11,7 @@ from hiive.mdptoolbox.mdp import QLearning
 def plot_value(hyperparam, df, size):
     plt.plot(df[hyperparam], df['max V'], label='Max Reward')
     plt.plot(df[hyperparam], df['mean V'], label='Mean Reward')
-    plt.title('%s vs Value' + hyperparam)
+    plt.title('%s vs Value' % hyperparam)
     plt.legend()
     plt.xlabel(hyperparam)
     plt.ylabel('Value')
@@ -57,6 +57,10 @@ def tree_QL(t, r, gamma_list, epsilon_list, alpha_list, alpha_decay_list, size):
     best_combo = results.iloc[best_combo_loc, :4]
     best_combo = list(zip(best_combo.index, best_combo))
     print('Highest Value Combination: ' + str(best_combo))
+
+    # print time from best combo
+    print('Time to converge with size %s at best combo: %s'
+          % (str(size), str(results['time'].iloc[best_combo_loc])))
 
     # plot combos of other parameters for each optimal value
     print('Plotting things')
@@ -222,6 +226,9 @@ def lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_l
     best_combo = list(zip(best_combo.index, best_combo))
     print('Highest Value Combination: ' + str(best_combo))
 
+    # print time required for optimal policy
+    print('Time to converge for best combo : ' + str(results['time'].iloc[best_combo_loc]))
+
     # plot policy from optimal run
     best_policy = results['policy'].iloc[best_combo_loc]
     marked_policy(best_policy, env)
@@ -282,7 +289,7 @@ def marked_policy(P, env):
 
 def plot_value_lake(hyperparam, df):
     plt.plot(df[hyperparam], df['reward'], label='Avg Episode Reward')
-    plt.title('%s vs Value' + hyperparam)
+    plt.title('%s vs Value' % hyperparam)
     plt.legend()
     plt.xlabel(hyperparam)
     plt.ylabel('Value')

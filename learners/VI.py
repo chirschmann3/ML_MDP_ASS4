@@ -4,14 +4,11 @@ https://towardsdatascience.com/value-iteration-to-solve-openai-gyms-frozenlake-6
 
 """
 
-import gymnasium as gym
-import hiive.mdptoolbox as mdptoolbox
 import pandas as pd
 from hiive.mdptoolbox.mdp import ValueIteration
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import math
 
 
 def plot_convergence(delta_list, env_name, gamma):
@@ -168,6 +165,9 @@ def tree_VI(t, r, gamma_list, theta, size):
                         runs[-1]['Error'], runs[-1]['Max V'], runs[-1]['Mean V'], test.policy]
         results.loc[len(results.index)] = results_list
 
+    # print time to complete at final gamma
+    print('Time to converge at size %s with gamma=%s: %s' % (str(size), str(gamma), str(results['time'].iloc[-1])))
+
     # plot gamma vs Max and Mean V
     plt.plot(results['gamma'], results['max V'], label='Max V')
     plt.plot(results['gamma'], results['mean V'], label='Mean V')
@@ -175,6 +175,7 @@ def tree_VI(t, r, gamma_list, theta, size):
     plt.legend()
     plt.xlabel('Gamma')
     plt.ylabel('Value')
+    plt.ylim((0, 165))
     plt.savefig('images/VI/tree_valuegamma_' + str(size))
     plt.clf()
 
@@ -184,6 +185,7 @@ def tree_VI(t, r, gamma_list, theta, size):
     plt.title('Error by Iteration')
     plt.xlabel('Iteration')
     plt.ylabel('Error')
+    plt.xlim((0, 30))
     plt.savefig('images/VI/tree_convergence_' + str(size))
     plt.clf()
 

@@ -3,7 +3,6 @@ Main place to gather and learn from the all knowledgable Bill Nye.
 I.e. run all experiments here....
 """
 import random
-
 from learners import VI, PI, qlearner
 import gymnasium as gym
 import hiive.mdptoolbox.example
@@ -11,19 +10,6 @@ import numpy as np
 import pandas as pd
 import time
 import random
-
-
-# def test_gamma(gamma_list, env_name, iteration_type):
-#     for gamma in gamma_list:
-#         print('gamma = %s' % str(gamma))
-#         env = gym.make(env_name)
-#         if iteration_type == 'value_iteration':
-#             start = time.time()
-#             optimal_v, env = value_iteration.value_iteration(env, gamma)
-#             print('Time to converge: ' + str((time.time() - start)))
-#             policy = value_iteration.extract_policy(optimal_v, env, gamma)
-#             policy_scores = value_iteration.evaluate_policy(env, policy, gamma, n=1000)
-#             print('Policy avg score = %s' % np.mean(policy_scores))
 
 
 def run_value_iteration(gamma_list, theta, env_name, *args):
@@ -90,6 +76,7 @@ def run_policy_iteration(gamma_list, eps, env_name, error_gamma2plot, *args):
             print()
 
             PI.marked_policy(pi, env=env, env_name=env_name, gamma=gamma)
+            # PI.plot_policy(pi, env_name, gamma)
 
 
 def run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay_list, *args):
@@ -102,7 +89,6 @@ def run_qlearning(env_name, gamma_list, epsilon_list, alpha_list, alpha_decay_li
     else:
         env = gym.make(env_name)
         qlearner.lake_QL_experiments(env, gamma_list, epsilon_list, alpha_list, alpha_decay_list)
-
 
 
 if __name__=='__main__':
